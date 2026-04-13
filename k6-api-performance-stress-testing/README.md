@@ -67,15 +67,12 @@ k6 run scripts/stress_test.js
 ## Project Structure
 
 k6-api-performance-stress-testing/
-│
-├── scripts
-│       stress_test.js
-│
-├── reports
-│      summary_report.png
-│      vu_logs.png
-│
-└── README.md
+scripts
+     -stress_test.js
+reports
+     -summary_report.png
+     -vu_logs.png
+README.md
 
 ## Key Learnings
 - Hands-on experience designing performance thresholds and interpreting 
