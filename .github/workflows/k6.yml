@@ -1,0 +1,28 @@
+name: k6 Performance Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "Load profile"
+        type: choice
+        options: [smoke, load, stress]
+        default: smoke
+
+jobs:
+  k6:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/setup-k6-action@v1
+      - name: Run k6 (${{ inputs.profile || 'smoke' }})
+        run: |
+          mkdir -p reports
+          k6 run -e PROFILE=${{ inputs.profile || 'smoke' }} scripts/pizza_load_test.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: k6-summary
+          path: reports/
