@@ -38,7 +38,11 @@ const ruleViolations = new Rate("pizza_rule_violations");
 
 export const options = {
   scenarios: {
-    [PROFILE]: { executor: "ramping-vus", startVUs: 0, stages: PROFILES[PROFILE] },
+    [PROFILE]: {
+      executor: "ramping-vus",
+      startVUs: PROFILE === "smoke" ? 1 : 0, // smoke holds 1 VU from the start
+      stages: PROFILES[PROFILE],
+    },
   },
   thresholds: {
     http_req_failed: ["rate<0.01"],
@@ -46,6 +50,7 @@ export const options = {
     pizza_recommendation_duration: ["p(95)<1000", "p(99)<2000"],
     pizza_rule_violations: ["rate==0"],
     checks: ["rate>0.99"],
+    iterations: ["count>0"], // fail instead of passing on an empty run
   },
 };
 

@@ -31,6 +31,24 @@ A realistic user journey: browse toppings, request a pizza recommendation with r
 | `pizza_rule_violations` (custom Rate) | 0%: a vegetarian request must never return meat |
 | `checks` | > 99% pass |
 
+### Run 2: `load` profile (20 VUs, 3 min)
+
+Run from Dhaka against the public QuickPizza instance on 7 Oct 2026.
+
+| Metric | Result | Threshold | |
+|---|---|---|---|
+| Requests / iterations | 3,308 / 1,654 | — | |
+| Checks passed | 8,270 / 8,270 (100%) | > 99% | ✅ |
+| Error rate | 0.00% | < 1% | ✅ |
+| Vegetarian-rule violations | 0 | 0 | ✅ |
+| Toppings p95 (median) | 1.26 s (249 ms) | p95 < 500 ms | ❌ |
+| Recommendation p95 / p99 | 1.11 s / < 2 s | p95 < 1 s, p99 < 2 s | ❌ / ✅ |
+| Max response time | 4.33 s | — | |
+
+**Finding:** the API stayed **functionally correct** under load, with zero errors and zero business-rule violations, but **missed its latency targets**. The median stayed low (about 250 ms) while p95 rose about 5× above it, so most requests are fast and a minority are very slow. That pattern points to queuing or resource contention rather than slow code on every request. Some of the tail may be network latency from Bangladesh to the hosted demo, so the next step is to repeat the run near the server (or against a local QuickPizza container) to separate network time from server time.
+
+The CI smoke run (1 VU) stays within all thresholds, so the badge reflects script health; the load result above is recorded by hand.
+
 **Techniques used:** `ramping-vus` scenarios selected by an environment variable, `group()` per user step, per-endpoint tags so each endpoint gets its own threshold, custom `Trend` and `Rate` metrics, response-body validation, and `handleSummary()` exporting a JSON summary that CI uploads as an artifact.
 
 ---
